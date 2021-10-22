@@ -95,13 +95,19 @@ def mysql(
         else:
             connection_kwargs["port"] = process.port
 
+        mysql_conn: MySQLdb.Connection = MySQLdb.connect(**connection_kwargs)
         try:
-            mysql_conn: MySQLdb.Connection = MySQLdb.connect(**connection_kwargs)
+            mysql_conn.query(
+                f"CREATE DATABASE {mysql_db} "
+                f"DEFAULT CHARACTER SET {charset} "
+                f"DEFAULT COLLATE {collation}"
+            )
         except OperationalError:
             # Fall back to mysql connection with root user
             connection_kwargs["user"] = "root"
-            mysql_conn: MySQLdb.Connection = MySQLdb.connect(**connection_kwargs)
-        try:
+            mysql_conn: MySQLdb.Connection = MySQLdb.connect(
+                    **connection_kwargs
+                    )
             mysql_conn.query(
                 f"CREATE DATABASE {mysql_db} "
                 f"DEFAULT CHARACTER SET {charset} "
