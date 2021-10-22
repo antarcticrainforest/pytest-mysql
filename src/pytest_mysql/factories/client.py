@@ -107,7 +107,7 @@ def mysql(
             connection_kwargs["user"] = "root"
             mysql_conn: MySQLdb.Connection = MySQLdb.connect(
                 **connection_kwargs
-                )
+            )
             mysql_conn.query(
                 f"CREATE DATABASE {mysql_db} "
                 f"DEFAULT CHARACTER SET {charset} "
