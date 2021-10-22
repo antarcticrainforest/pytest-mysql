@@ -20,7 +20,7 @@ from typing import Union
 
 import pytest
 import MySQLdb
-from MySQLdb import ProgrammingError
+from MySQLdb import ProgrammingError, OperationalError
 from _pytest.fixtures import FixtureRequest
 
 from pytest_mysql.config import get_config
@@ -33,7 +33,6 @@ def mysql(
     process_fixture_name,
     passwd=None,
     dbname=None,
-    user=None,
     charset="utf8",
     collation="utf8_general_ci",
 ):
@@ -50,7 +49,6 @@ def mysql(
     :param str process_fixture_name: process fixture name
     :param str passwd: mysql server's password
     :param str dbname: database's name
-    :param str user: mysql user name
     :param str charset: MySQL characterset to use by default
         for *tests* database
     :param str collation: MySQL collation to use by default
@@ -83,13 +81,13 @@ def mysql(
         if not process.running():
             process.start()
 
-        mysql_user = user or config["user"] or "root"
+        mysql_user = config["user"] or "root"
         mysql_passwd = passwd or config["passwd"]
         mysql_db = dbname or config["dbname"]
 
         connection_kwargs = {
             "host": process.host,
-            "user": mysql_user,
+            "user": process.user,
             "passwd": mysql_passwd,
         }
         if process.unixsocket:
@@ -97,8 +95,12 @@ def mysql(
         else:
             connection_kwargs["port"] = process.port
 
-        mysql_conn: MySQLdb.Connection = MySQLdb.connect(**connection_kwargs)
-
+        try:
+            mysql_conn: MySQLdb.Connection = MySQLdb.connect(**connection_kwargs)
+        except OperationalError:
+            # Fall back to mysql connection with root user
+            connection_kwargs["user"] = "root"
+            mysql_conn: MySQLdb.Connection = MySQLdb.connect(**connection_kwargs)
         try:
             mysql_conn.query(
                 f"CREATE DATABASE {mysql_db} "

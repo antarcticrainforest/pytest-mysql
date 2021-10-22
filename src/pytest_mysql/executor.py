@@ -155,7 +155,14 @@ class MySQLExecutor(TCPExecutor):
             f"{self.admin_exec} --socket={self.unixsocket} "
             f"--user={self.user} shutdown"
         )
-        subprocess.check_output(shutdown_command, shell=True)
+        try:
+            subprocess.check_output(shutdown_command, shell=True)
+        except subprocess.CalledProcessError:
+            shutdown_command = (
+                f"{self.admin_exec} --socket={self.unixsocket} "
+                f"--user=root shutdown"
+            )
+
 
     def stop(self, sig=None, exp_sig=None):
         """Stop the server."""
