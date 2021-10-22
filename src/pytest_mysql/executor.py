@@ -163,7 +163,6 @@ class MySQLExecutor(TCPExecutor):
                 f"--user=root shutdown"
             )
 
-
     def stop(self, sig=None, exp_sig=None):
         """Stop the server."""
         self.shutdown()
