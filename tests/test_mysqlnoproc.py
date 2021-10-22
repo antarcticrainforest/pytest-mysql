@@ -1,7 +1,7 @@
 from pytest_mysql import factories
 from tests.test_mysql import QUERY
 
-mysql_noproc2 = factories.mysql_noproc(user='root')
+mysql_noproc2 = factories.mysql_noproc()
 mysqlnoproc_client = factories.mysql("mysql_noproc2")
 
 
